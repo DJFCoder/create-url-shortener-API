@@ -87,3 +87,95 @@ This service works in conjunction with the short URL redirection API. After crea
 - The code generation uses UUID to minimize collisions
 - No URL validation is performed - consider implementing validation to prevent malicious redirects
 - No authentication/authorization is implemented in this basic example
+
+---
+
+# Criar URL Encurtada (pt-br)
+
+## Visão Geral
+
+Este projeto implementa uma API serverless para criação de URLs curtas utilizando AWS Lambda e S3. Ele permite gerar códigos únicos para URLs originais e armazená-los com tempo de expiração.
+
+## Funcionalidades
+
+- Geração de códigos curtos únicos para URLs longas
+- Suporte para configuração de tempo de expiração
+- Armazenamento dos dados em bucket S3
+- Resposta com o código de URL curta gerado
+
+## Arquitetura
+
+A aplicação é composta por:
+
+1. **AWS Lambda Function**: Processa as requisições HTTP para criar URLs curtas
+2. **Amazon S3**: Armazena os dados de mapeamento entre URLs curtas e originais
+3. **Modelo de dados**: Representação dos dados de URL com tempo de expiração
+
+## Como Funciona
+
+1. O cliente envia uma requisição POST contendo a URL original e o tempo de expiração
+2. A função Lambda gera um código único de 8 caracteres (baseado em UUID)
+3. A função cria um objeto JSON com a URL original e o tempo de expiração
+4. O objeto é armazenado no bucket S3 com nome `{código}.json`
+5. A API retorna o código gerado ao cliente
+
+## Estrutura de Arquivos
+
+- `Main.java`: Classe principal que implementa o handler da função Lambda
+- `UrlData.java`: Classe de modelo para os dados da URL
+
+## Formato da Requisição
+
+```json
+{
+    "originalUrl": "https://exemplo.com/pagina-com-url-muito-longa",
+    "expirationTime": "1640995200"
+}
+```
+
+Onde `expirationTime` é o timestamp Unix (em segundos) que define quando a URL expira.
+
+## Formato da Resposta
+
+```json
+{
+    "code": "a1b2c3d4"
+}
+```
+
+Este código deve ser utilizado para compor a URL curta final, por exemplo: `https://seudominio.com/a1b2c3d4`
+
+## Tecnologias Utilizadas
+
+- Java
+- AWS Lambda
+- Amazon S3
+- Jackson (para processamento JSON)
+- Lombok (para redução de boilerplate)
+- AWS SDK para Java v2
+
+## Requisitos
+
+- JDK 11 ou superior
+- Maven
+- AWS CLI configurado com credenciais apropriadas
+- Bucket S3 configurado para armazenamento dos dados
+
+## Configuração
+
+Para utilizar esta aplicação, você precisa:
+
+1. Criar um bucket S3 chamado `url-shortener-devjf` (ou alterar o nome no código)
+2. Configurar o Lambda para ser acionado por requisições HTTP via API Gateway
+3. Configurar as permissões necessárias para o Lambda acessar o bucket S3
+4. Configurar o API Gateway para aceitar requisições POST com corpo JSON
+
+## Integração
+
+Este serviço trabalha em conjunto com a API de redirecionamento de URLs curtas. Após criar uma URL curta com esta API, o código retornado pode ser usado com o serviço de redirecionamento para acessar a URL original.
+
+## Considerações de Segurança
+
+- A geração de códigos utiliza UUID para minimizar colisões
+- Nenhuma validação de URL é realizada - considere implementar validação para evitar redirecionamentos maliciosos
+- Não há autenticação/autorização implementada neste exemplo básico
